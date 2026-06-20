@@ -22,22 +22,25 @@ export default function FilterBar() {
     filters.platform !== "all";
 
   return (
-    <div className="bg-cinema-surface/60 backdrop-blur border border-cinema-gold/20 rounded-2xl p-5 space-y-4 animate-slide-up">
+    <div className="bg-cinema-surface/60 backdrop-blur border border-cinema-gold/20 rounded-2xl p-4 sm:p-5 space-y-4 animate-slide-up">
       <div className="flex items-center gap-2 text-cinema-gold mb-1">
-        <Filter size={18} />
-        <span className="font-display font-semibold">筛选与状态</span>
+        <Filter size={16} className="sm:hidden" />
+        <Filter size={18} className="hidden sm:block" />
+        <span className="font-display font-semibold text-sm sm:text-base">筛选与状态</span>
         {hasActiveFilters && (
           <button
             onClick={resetFilters}
-            className="ml-auto flex items-center gap-1 text-xs text-gray-400 hover:text-cinema-gold transition-colors"
+            className="ml-auto flex items-center gap-1 text-xs text-gray-400 hover:text-cinema-gold transition-colors shrink-0"
           >
-            <RotateCcw size={14} />
-            重置筛选
+            <RotateCcw size={12} className="sm:hidden" />
+            <RotateCcw size={14} className="hidden sm:block" />
+            <span className="hidden sm:inline">重置筛选</span>
+            <span className="sm:hidden">重置</span>
           </button>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {statusTabs.map((tab) => {
           const isActive = filters.status === tab.key;
           const colorClass = tab.color;
@@ -45,7 +48,7 @@ export default function FilterBar() {
             <button
               key={tab.key}
               onClick={() => setFilters({ status: tab.key })}
-              className={`status-tab border ${
+              className={`status-tab border px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm ${
                 isActive
                   ? colorClass === "cinema-gold"
                     ? `bg-cinema-gold/15 border-cinema-gold text-cinema-gold shadow-gold-sm`
@@ -83,7 +86,7 @@ export default function FilterBar() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <div>
           <label className="block text-xs text-gray-400 mb-1.5">最低评分</label>
           <select

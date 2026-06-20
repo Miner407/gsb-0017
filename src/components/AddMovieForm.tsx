@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp, X, AlertCircle } from "lucide-react";
 import { useMovieStore } from "@/store/useMovieStore";
 import { STATUS_LABELS, PLATFORM_OPTIONS, type MovieStatus } from "@/types/movie";
 
@@ -11,6 +11,8 @@ export default function AddMovieForm() {
   const [watchDate, setWatchDate] = useState("");
   const [platform, setPlatform] = useState("");
   const [review, setReview] = useState("");
+  const [titleError, setTitleError] = useState("");
+  const [ratingError, setRatingError] = useState("");
 
   const addMovie = useMovieStore((s) => s.addMovie);
 
@@ -21,16 +23,38 @@ export default function AddMovieForm() {
     setWatchDate("");
     setPlatform("");
     setReview("");
+    setTitleError("");
+    setRatingError("");
+  };
+
+  const validateForm = (): boolean => {
+    let valid = true;
+
+    if (!title.trim()) {
+      setTitleError("电影名称不能为空");
+      valid = false;
+    } else {
+      setTitleError("");
+    }
+
+    if (rating < 0 || rating > 10) {
+      setRatingError("评分必须在 0 到 10 之间");
+      valid = false;
+    } else {
+      setRatingError("");
+    }
+
+    return valid;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!validateForm()) return;
 
     addMovie({
       title: title.trim(),
       status,
-      rating,
+      rating: Math.max(0, Math.min(10, rating)),
       watchDate: watchDate || undefined,
       platform: platform || undefined,
       review: review.trim() || undefined,
@@ -49,37 +73,48 @@ export default function AddMovieForm() {
     <div className="bg-cinema-surface/60 backdrop-blur border border-cinema-gold/20 rounded-2xl overflow-hidden animate-slide-up">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-5 hover:bg-cinema-surface2/30 transition-colors"
+        className="w-full flex items-center justify-between p-4 sm:p-5 hover:bg-cinema-surface2/30 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cinema-gold to-cinema-bronze flex items-center justify-center text-cinema-bg">
-            <Plus size={20} strokeWidth={2.5} />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cinema-gold to-cinema-bronze flex items-center justify-center text-cinema-bg shrink-0">
+            <Plus size={18} className="sm:hidden" strokeWidth={2.5} />
+            <Plus size={20} className="hidden sm:block" strokeWidth={2.5} />
           </div>
-          <div className="text-left">
-            <h3 className="font-display text-lg font-semibold text-gray-100">添加新电影</h3>
-            <p className="text-sm text-gray-400">记录你的观影历程</p>
+          <div className="text-left min-w-0">
+            <h3 className="font-display text-base sm:text-lg font-semibold text-gray-100">添加新电影</h3>
+            <p className="text-xs sm:text-sm text-gray-400 truncate">记录你的观影历程</p>
           </div>
         </div>
-        <div className="text-cinema-gold">
-          {isOpen ? <ChevronUp size={22} /> : <ChevronDown size={22} />}
+        <div className="text-cinema-gold shrink-0">
+          {isOpen ? <ChevronUp size={20} className="sm:hidden" /> : <ChevronDown size={20} className="sm:hidden" />}
+          {isOpen ? <ChevronUp size={22} className="hidden sm:block" /> : <ChevronDown size={22} className="hidden sm:block" />}
         </div>
       </button>
 
       {isOpen && (
         <form
           onSubmit={handleSubmit}
-          className="px-5 pb-5 pt-2 border-t border-cinema-gold/10 space-y-4 animate-fade-in"
+          className="px-4 sm:px-5 pb-4 sm:pb-5 pt-2 border-t border-cinema-gold/10 space-y-4 animate-fade-in"
         >
           <div>
             <label className="block text-sm text-gray-300 mb-1.5">电影名称 *</label>
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (titleError) setTitleError("");
+              }}
               placeholder="例如：盗梦空间"
-              className="gold-input"
+              className={`gold-input ${titleError ? "border-cinema-dropped focus:border-cinema-dropped" : ""}`}
               autoFocus
             />
+            {titleError && (
+              <p className="mt-1.5 text-xs text-cinema-dropped flex items-center gap-1">
+                <AlertCircle size={12} />
+                {titleError}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -117,7 +152,11 @@ export default function AddMovieForm() {
                 max={10}
                 step={0.5}
                 value={rating}
-                onChange={(e) => setRating(parseFloat(e.target.value))}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  setRating(val);
+                  if (ratingError) setRatingError("");
+                }}
                 className="w-full h-2 bg-cinema-surface2 rounded-full appearance-none cursor-pointer accent-cinema-gold"
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -125,18 +164,35 @@ export default function AddMovieForm() {
                 <span>5</span>
                 <span>10</span>
               </div>
+              {ratingError && (
+                <p className="mt-1.5 text-xs text-cinema-dropped flex items-center gap-1">
+                  <AlertCircle size={12} />
+                  {ratingError}
+                </p>
+              )}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-300 mb-1.5">观影日期</label>
+              <label className="block text-sm text-gray-300 mb-1.5">
+                观影日期
+                {status === "watched" && (
+                  <span className="text-cinema-watched ml-1">(建议填写)</span>
+                )}
+              </label>
               <input
                 type="date"
                 value={watchDate}
                 onChange={(e) => setWatchDate(e.target.value)}
                 className="gold-input"
               />
+              {status === "watched" && !watchDate && (
+                <p className="mt-1.5 text-xs text-cinema-watched/80 flex items-center gap-1">
+                  <AlertCircle size={12} />
+                  标记为已看的电影建议填写观影日期
+                </p>
+              )}
             </div>
 
             <div>
@@ -146,7 +202,7 @@ export default function AddMovieForm() {
                 onChange={(e) => setPlatform(e.target.value)}
                 className="gold-input"
               >
-                <option value="">选择平台</option>
+                <option value="">选择平台（可选）</option>
                 {PLATFORM_OPTIONS.map((p) => (
                   <option key={p} value={p}>
                     {p}

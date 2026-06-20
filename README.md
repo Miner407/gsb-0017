@@ -1,57 +1,234 @@
-# React + TypeScript + Vite
+# 观影清单
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一个简洁优雅的个人电影观影记录 Web 应用，帮助你记录和管理观影历程。
 
-Currently, two official plugins are available:
+## 功能介绍
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 核心功能
 
-## Expanding the ESLint configuration
+- **电影管理**：添加、编辑、删除电影记录
+- **状态跟踪**：支持「想看」「已看」「弃看」三种状态，一键切换
+- **评分系统**：0-10 分评分，支持 0.5 分步进
+- **观影信息**：记录观影日期、观影平台、短评等信息
+- **数据统计**：总收藏数、平均评分、年度观影数、各状态数量统计
+- **筛选功能**：按状态、评分范围、观影平台多维筛选
+- **本地持久化**：数据保存在浏览器 localStorage，刷新不丢失
+- **响应式设计**：完美适配桌面端和移动端
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 界面特色
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- 电影院主题深色设计，金色点缀
+- 流畅的动画过渡效果
+- 卡片式电影列表，胶片边框装饰
+- 状态色标系统（想看-蓝色、已看-绿色、弃看-红色）
+
+## 技术栈
+
+- **框架**：React 18 + TypeScript
+- **构建工具**：Vite
+- **状态管理**：Zustand（支持 localStorage 持久化）
+- **样式**：Tailwind CSS
+- **图标**：Lucide React
+- **路由**：React Router
+
+## 依赖安装
+
+确保你的环境已安装 Node.js（推荐 v18 及以上版本）。
+
+```bash
+# 安装项目依赖
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 启动方式
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 开发模式
 
-export default tseslint.config({
-  extends: [
-    // other configs...
-    // Enable lint rules for React
-    reactX.configs['recommended-typescript'],
-    // Enable lint rules for React DOM
-    reactDom.configs.recommended,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+npm run dev
 ```
+
+启动后，在浏览器中访问 http://localhost:5173 即可使用应用。
+
+### 预览生产构建
+
+```bash
+npm run preview
+```
+
+## 构建命令
+
+### 类型检查
+
+```bash
+npm run check
+```
+
+仅执行 TypeScript 类型检查，不生成产物。
+
+### 代码检查
+
+```bash
+npm run lint
+```
+
+使用 ESLint 检查代码规范。
+
+### 生产构建
+
+```bash
+npm run build
+```
+
+执行类型检查并构建生产版本，产物输出到 `dist/` 目录。
+
+## 数据持久化位置
+
+应用数据存储在浏览器的 **localStorage** 中：
+
+- **存储键名**：`movie-watchlist-storage`
+- **存储内容**：电影列表数据 + 筛选条件
+- **数据结构**：JSON 格式
+- **特点**：
+  - 刷新页面后数据保留
+  - 关闭浏览器后数据保留
+  - 同一浏览器同一域名下数据共享
+  - 清除浏览器数据会导致数据丢失
+
+> ⚠️ 注意：数据仅存储在本地浏览器中，不会上传到服务器。更换浏览器或清除浏览器数据前请自行备份。
+
+## 主要页面流程
+
+### 首页
+
+应用只有一个主页面，分为以下几个区域：
+
+1. **顶部导航栏**
+   - 应用 Logo 和名称
+   - 固定在页面顶部，滚动时保持可见
+
+2. **统计面板**（4 个统计卡片）
+   - 总收藏数
+   - 平均评分（仅统计已看且有评分的电影）
+   - 今年观影数
+   - 想看/已看/弃看 数量分布
+
+3. **操作区**
+   - 左侧：添加新电影表单（可折叠）
+   - 右侧：筛选与状态栏
+
+4. **电影列表**
+   - 卡片式网格布局
+   - 空状态提示
+   - 筛选结果计数
+
+### 操作流程
+
+#### 添加电影
+1. 点击「添加新电影」展开表单
+2. 填写电影名称（必填）
+3. 选择状态（想看/已看/弃看）
+4. 设置评分（可选，0-10 分）
+5. 选择观影日期（已看状态建议填写）
+6. 选择观影平台（可选）
+7. 填写短评（可选）
+8. 点击「保存电影」
+
+#### 编辑电影
+1. 点击电影卡片上的编辑按钮（铅笔图标）
+2. 修改需要更新的字段（标题、状态、评分、日期、平台、短评）
+3. 点击保存按钮（勾选图标）确认，或点击取消按钮放弃修改
+
+#### 删除电影
+1. 点击电影卡片上的删除按钮（垃圾桶图标）
+2. 在确认对话框中点击「确认删除」
+3. 电影将被永久删除
+
+#### 切换状态
+- 点击电影卡片上的状态标签按钮
+- 状态按「想看 → 已看 → 弃看 → 想看」循环切换
+- 切换后统计数据自动更新
+
+#### 筛选电影
+- 点击顶部状态标签快速筛选
+- 使用下拉框按评分范围筛选
+- 使用下拉框按观影平台筛选
+- 点击「重置筛选」恢复全部显示
+
+## 项目结构
+
+```
+gsb-0017/
+├── public/              # 静态资源
+│   └── favicon.svg      # 网站图标
+├── src/
+│   ├── components/      # React 组件
+│   │   ├── AddMovieForm.tsx    # 添加电影表单
+│   │   ├── FilterBar.tsx       # 筛选栏
+│   │   ├── MovieCard.tsx       # 电影卡片
+│   │   ├── MovieList.tsx       # 电影列表
+│   │   └── StatsPanel.tsx      # 统计面板
+│   ├── pages/           # 页面组件
+│   │   └── Home.tsx            # 首页
+│   ├── store/           # 状态管理
+│   │   └── useMovieStore.ts    # 电影数据 store
+│   ├── types/           # TypeScript 类型定义
+│   │   └── movie.ts            # 电影相关类型
+│   ├── utils/           # 工具函数
+│   │   └── statistics.ts       # 统计与筛选工具
+│   ├── lib/             # 公共库
+│   │   └── utils.ts            # 通用工具函数
+│   ├── App.tsx          # 应用根组件
+│   ├── main.tsx         # 应用入口
+│   └── index.css        # 全局样式
+├── index.html           # HTML 模板
+├── package.json         # 项目配置
+├── tailwind.config.js   # Tailwind 配置
+├── tsconfig.json        # TypeScript 配置
+├── vite.config.ts       # Vite 配置
+├── eslint.config.js     # ESLint 配置
+├── TESTING.md           # 测试验证说明
+└── README.md            # 项目说明文档
+```
+
+## 验证步骤
+
+完整的功能验证步骤请参考 [TESTING.md](./TESTING.md)。
+
+### 快速验证清单
+
+- [ ] 可以添加新电影
+- [ ] 可以编辑电影信息（标题、状态、评分、日期、平台、短评）
+- [ ] 删除电影前有二次确认
+- [ ] 状态可以一键切换
+- [ ] 按状态筛选正常工作
+- [ ] 按评分筛选正常工作
+- [ ] 按平台筛选正常工作
+- [ ] 统计数据实时更新
+- [ ] 刷新页面后数据不丢失（localStorage 持久化）
+- [ ] 移动端显示正常，无溢出和拥挤
+
+### 自动化验证
+
+在项目根目录执行以下命令，确保全部通过：
+
+```bash
+# TypeScript 类型检查
+npm run check
+
+# ESLint 代码检查
+npm run lint
+
+# 生产环境构建
+npm run build
+```
+
+## 验证结果
+
+- ✅ `npm run check` — 通过
+- ✅ `npm run lint` — 通过
+- ✅ `npm run build` — 通过
+
+## 许可证
+
+MIT License
